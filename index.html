@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student CRUD API</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      color: #1a1a2e;
+      padding: 2rem;
+    }
+
+    .header {
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #dde3f0;
+      margin-bottom: 1.5rem;
+    }
+
+    .header h1 { font-size: 22px; font-weight: 600; }
+    .header p { font-size: 14px; color: #6b7280; margin-top: 4px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1rem;
+      border: 1px solid #dde3f0;
+    }
+
+    .stat-label { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+    .stat-value { font-size: 26px; font-weight: 600; color: #185FA5; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #dde3f0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 13px; color: #6b7280; }
+
+    input[type="text"],
+    input[type="number"] {
+      padding: 8px 10px;
+      border: 1px solid #dde3f0;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 100%;
+      outline: none;
+      background: #f9fafb;
+    }
+
+    input:focus { border-color: #185FA5; background: #fff; }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #dde3f0;
+      background: transparent;
+      color: #1a1a2e;
+      transition: background 0.15s;
+    }
+
+    .btn:hover { background: #f1f5ff; }
+
+    .btn-primary {
+      background: #185FA5;
+      color: #fff;
+      border-color: #185FA5;
+    }
+
+    .btn-primary:hover { background: #0C447C; }
+
+    .btn-edit {
+      background: transparent;
+      color: #185FA5;
+      border: 1px solid #85B7EB;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-edit:hover { background: #E6F1FB; }
+
+    .btn-del {
+      background: transparent;
+      color: #A32D2D;
+      border: 1px solid #F09595;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-del:hover { background: #FCEBEB; }
+
+    .btn-save {
+      background: #185FA5;
+      color: #fff;
+      border: 1px solid #185FA5;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid #dde3f0;
+      background: transparent;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th {
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      padding: 8px 12px;
+      border-bottom: 1px solid #dde3f0;
+    }
+
+    td {
+      padding: 10px 12px;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #E6F1FB;
+      color: #0C447C;
+      font-weight: 600;
+    }
+
+    .actions-col { display: flex; gap: 6px; }
+
+    .empty {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+      z-index: 999;
+      border: 1px solid;
+      font-weight: 500;
+    }
+
+    .toast-success {
+      background: #EAF3DE;
+      color: #27500A;
+      border-color: #97C459;
+    }
+
+    .toast-error {
+      background: #FCEBEB;
+      color: #791F1F;
+      border-color: #F09595;
+    }
+
+    .edit-row td { background: #f0f6ff; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🎓 Student Records</h1>
+    <p>Connected to your PHP CRUD API</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Total students</div>
+      <div class="stat-value" id="total">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Courses</div>
+      <div class="stat-value" id="courses">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Average age</div>
+      <div class="stat-value" id="avgage">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">➕ Add New Student</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="name" placeholder="e.g. Juan dela Cruz">
+      </div>
+      <div class="field">
+        <label>Course</label>
+        <input type="text" id="course" placeholder="e.g. BSCS">
+      </div>
+      <div class="field">
+        <label>Age</label>
+        <input type="number" id="age" placeholder="e.g. 20" min="1">
+      </div>
+      <button class="btn btn-primary" onclick="createStudent()">Add</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📋 All Students</span>
+      <button class="btn" onclick="loadStudents()" style="font-size:13px; padding:5px 12px;">🔄 Refresh</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:60px">ID</th>
+          <th>Name</th>
+          <th style="width:130px">Course</th>
+          <th style="width:70px">Age</th>
+          <th style="width:150px">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr><td colspan="5" class="empty">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = 'http://localhost/student_crud_api/api';
+    let editingId = null;
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast toast-' + type;
+      t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+    function updateStats(students) {
+      document.getElementById('total').textContent = students.length;
+      const unique = new Set(students.map(s => s.course)).size;
+      document.getElementById('courses').textContent = unique;
+      if (students.length) {
+        const avg = students.reduce((a, s) => a + parseInt(s.age), 0) / students.length;
+        document.getElementById('avgage').textContent = Math.round(avg);
+      } else {
+        document.getElementById('avgage').textContent = '—';
+      }
+    }
+
+    async function loadStudents() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">Loading...</td></tr>';
+      try {
+        const res = await fetch(API + '/read.php');
+        const data = await res.json();
+        updateStats(data);
+        if (!data.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty">No students yet. Add one above!</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.map(s => `
+          <tr id="row-${s.id}">
+            <td><span class="badge">${s.id}</span></td>
+            <td>${s.name}</td>
+            <td>${s.course}</td>
+            <td>${s.age}</td>
+            <td><div class="actions-col">
+              <button class="btn-edit" onclick="startEdit(${s.id},'${s.name}','${s.course}',${s.age})">✏️ Edit</button>
+              <button class="btn-del" onclick="deleteStudent(${s.id})">🗑️ Del</button>
+            </div></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty" style="color:#A32D2D">❌ Cannot connect to API. Is XAMPP running?</td></tr>';
+      }
+    }
+
+    async function createStudent() {
+      const name = document.getElementById('name').value.trim();
+      const course = document.getElementById('course').value.trim();
+      const age = document.getElementById('age').value.trim();
+      if (!name || !course || !age) { showToast('Please fill in all fields', 'error'); return; }
+      const body = new URLSearchParams({ name, course, age });
+      const res = await fetch(API + '/create.php', { method: 'POST', body });
+      const data = await res.json();
+      showToast(data.message || 'Created!');
+      document.getElementById('name').value = '';
+      document.getElementById('course').value = '';
+      document.getElementById('age').value = '';
+      loadStudents();
+    }
+
+    function startEdit(id, name, course, age) {
+      if (editingId) cancelEdit();
+      editingId = id;
+      const row = document.getElementById('row-' + id);
+      row.classList.add('edit-row');
+      row.innerHTML = `
+        <td><span class="badge">${id}</span></td>
+        <td><input type="text" id="edit-name" value="${name}"></td>
+        <td><input type="text" id="edit-course" value="${course}"></td>
+        <td><input type="number" id="edit-age" value="${age}"></td>
+        <td><div class="actions-col">
+          <button class="btn-save" onclick="saveEdit(${id})">✅ Save</button>
+          <button class="btn-cancel" onclick="cancelEdit()">✖</button>
+        </div></td>
+      `;
+    }
+
+    function cancelEdit() {
+      editingId = null;
+      loadStudents();
+    }
+
+    async function saveEdit(id) {
+      const name = document.getElementById('edit-name').value.trim();
+      const course = document.getElementById('edit-course').value.trim();
+      const age = document.getElementById('edit-age').value.trim();
+      if (!name || !course || !age) { showToast('Please fill in all fields', 'error'); return; }
+      const body = new URLSearchParams({ id, name, course, age });
+      const res = await fetch(API + '/update.php', { method: 'POST', body });
+      const data = await res.json();
+      showToast(data.message || 'Updated!');
+      editingId = null;
+      loadStudents();
+    }
+
+    async function deleteStudent(id) {
+      if (!confirm('Delete this student?')) return;
+      const body = new URLSearchParams({ id });
+      const res = await fetch(API + '/delete.php', { method: 'POST', body });
+      const data = await res.json();
+      showToast(data.message || 'Deleted!');
+      loadStudents();
+    }
+
+    loadStudents();
+  </script>
+
+</body>
+</html>
